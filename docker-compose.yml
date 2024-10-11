@@ -3,6 +3,7 @@ version: '3'
 services:
   db:
     image: postgres:13
+    container_name: trans_db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
@@ -16,14 +17,15 @@ services:
     build:
       context: .
       dockerfile: ./backend/Dockerfile
+    container_name: trans_backend
     volumes:
       - ./backend:/app
     environment:
-      - POSTGRES_DB=mydatabase
-      - POSTGRES_USER=myuser
-      - POSTGRES_PASSWORD=mypassword
-      - POSTGRES_HOST=db
-      - POSTGRES_PORT=5432
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
     depends_on:
       - db
     networks:
@@ -35,6 +37,7 @@ services:
     build:
       context: .
       dockerfile: ./frontend/Dockerfile
+    container_name: trans_frontend
     volumes:
       - ./frontend:/usr/share/nginx/html
     networks:
