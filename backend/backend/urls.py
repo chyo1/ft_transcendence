@@ -14,9 +14,17 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path
+# urls.py
+
+from django.urls import path, include
+from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+
+    path('', views.home_view, name='home'),  # 기본 URL에 대한 뷰
+
+    path('api/login', views.login_view, name='login'),
+    # # 기존 URL들
+    # path('auth/', include('social_django.urls', namespace='social')),  # OAuth 경로
+    # path('dashboard/', views.dashboard, name='dashboard'),  # 로그인 후 대시보드
 ]
