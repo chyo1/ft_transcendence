@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  db:
+  database:
     image: postgres:13
     container_name: trans_db
     volumes:
@@ -20,18 +20,14 @@ services:
     container_name: trans_backend
     volumes:
       - ./backend:/app
-    environment:
-      POSTGRES_DB: mydatabase
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
     depends_on:
-      - db
+      - database
     networks:
       - app-network
     ports:
       - "8000:8000"
+    environment:
+      DATABASE_URL: postgres://myuser:mypassword@database:5432/mydatabase
 
   frontend:
     build:

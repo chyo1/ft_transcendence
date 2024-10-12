@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'social_django', #0Auth 인증
-    'backend',
     'django_extensions',
+    'backend',
 ]
 
 # 인증 백엔드 설정 (여기서는 Google을 예시로 사용)
@@ -49,9 +49,9 @@ INSTALLED_APPS = [
 # )
 
 # OAuth 관련 설정
-CLIENT_ID = 'u-s4t2ud-24c95636a0f25975e6468bfeb313c26de95a6a084519fb7f110aaf21dbe2d865'  # 42 OAuth 클라이언트 ID
-CLIENT_SECRET = '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' # 42 OAuth 클라이언트 Secret
-LOGIN_REDIRECT_URL = 'https://localhost:8000'
+CLIENT_ID = 'u-s4t2ud-962c1357c0982f1b74d2c3c06249f541d8117b56054ee4c2c2069b33100aa5e7'  # 42 OAuth 클라이언트 ID
+CLIENT_SECRET = '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' # 42 OAuth 클라이언트 Secret
+LOGIN_REDIRECT_URL = 'https://localhost:8000/oauth'
 OAUTH_URI = 'https://api.intra.42.fr/oauth/authorize'
 TOKEN_URI = 'https://api.intra.42.fr/oauth/token'
 USER_INFO_URL = 'https://api.intra.42.fr/v2/me'
@@ -97,7 +97,7 @@ DATABASES = {
         'NAME': 'mydatabase',
         'USER': 'myuser',
         'PASSWORD': 'mypassword',
-        'HOST': 'db',  # db 서비스 이름
+        'HOST': 'database',  # db 서비스 이름
         'PORT': '5432',
     }
 }

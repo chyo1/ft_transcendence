@@ -23,7 +23,7 @@ urlpatterns = [
 
     path('', views.home_view, name='home'),  # 기본 URL에 대한 뷰
 
-    path('api/login', views.login_view, name='login'),
+    path('oauth', views.login_view, name='login'),
     # # 기존 URL들
     # path('auth/', include('social_django.urls', namespace='social')),  # OAuth 경로
     # path('dashboard/', views.dashboard, name='dashboard'),  # 로그인 후 대시보드

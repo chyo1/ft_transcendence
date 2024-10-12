@@ -4,6 +4,13 @@ FROM python:3.10-slim
 # Set work directory
 WORKDIR /app
 
+# 시스템 패키지 업데이트 및 OpenSSL 설치
+RUN apt-get update && apt-get install -y \
+    libssl-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+
 # Install dependencies
 COPY requirements.txt /app/
 

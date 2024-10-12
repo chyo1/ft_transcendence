@@ -8,6 +8,9 @@ from django.contrib.auth.models import User
 from django.shortcuts import redirect, get_object_or_404
 from .models import UserProfile
 from django.http import HttpResponse
+import logging
+
+logger = logging.getLogger(__name__)
 
 def home_view(request):
   return HttpResponse("<h1>Welcome to the Home Page!</h1>")
@@ -63,43 +66,59 @@ def login_view(request):
 
       # User 객체 찾기 또는 생성
       user_email = user_info['email']
-      user, created = User.objects.get_or_create(username=user_email,
-                                                 defaults={'email': user_email})
-      #
-      # if created:
-      #   # User가 없으면 2단계 인증을 진행
-      #   if login_2fa(user_info):
-      #     # 2단계 인증이 성공하면 UserProfile에 정보 저장
-      #     user_profile, _ = UserProfile.objects.get_or_create(user=user)
-      #     user_profile.access_token = access_token
-      #     user_profile.save()
-      #     return JsonResponse({
-      #       'user': {
-      #         'username': user.username,
-      #         'email': user.email,
-      #         'name': user_info.get('name'),  # API에서 받아온 사용자 이름
-      #       }
-      #     })
-      #   else:
-      #     return JsonResponse({'error': '2FA failed'}, status=400)
-      #
-      # else:
-      #   # User가 이미 존재할 경우 UserProfile 업데이트
-      #   user_profile, _ = UserProfile.objects.get_or_create(user=user)
-      #   user_profile.access_token = access_token
-      #   user_profile.save()
-      #
-      #   return JsonResponse({
-      #     'user': {
-      #       'username': user.username,
-      #       'email': user.email,
-      #       'name': user_info.get('name'),  # API에서 받아온 사용자 이름
-      #     }
-      #   })
+      user, created = User.objects.get_or_create(
+          username=user_info['login'],  # OAuth에서 받은 username
+          defaults={
+            'first_name': user_info.get('first_name'),
+            'last_name': user_info.get('last_name'),
+            'email': user_email,
+            'username': user_info['login'],
+          }
+      )
 
-    else:
-      return JsonResponse({'error': 'Failed to retrieve access token'},
-                          status=400)
+      # UserProfile 객체 찾기 또는 생성
+      user_profile, profile_created = UserProfile.objects.get_or_create(
+        user=user)
+      user_profile.access_token = access_token  # access_token 저장
+      user_profile.save()  # 변경 사항 저장
+
+      # return JsonResponse({'success': 'get access token'},
+      #                     status=200)
+
+    #   if created:
+    #     # User가 없으면 2단계 인증을 진행
+    #     if login_2fa(user_info):
+    #       # 2단계 인증이 성공하면 UserProfile에 정보 저장
+    #       user_profile, _ = UserProfile.objects.get_or_create(user=user)
+    #       user_profile.access_token = access_token
+    #       user_profile.save()
+    #       return JsonResponse({
+    #         'user': {
+    #           'username': user.username,
+    #           'email': user.email,
+    #           'name': user_info.get('name'),  # API에서 받아온 사용자 이름
+    #         }
+    #       })
+    #     else:
+    #       return JsonResponse({'error': '2FA failed'}, status=400)
+    #
+    #   else:
+    #     # User가 이미 존재할 경우 UserProfile 업데이트
+    #     user_profile, _ = UserProfile.objects.get_or_create(user=user)
+    #     user_profile.access_token = access_token
+    #     user_profile.save()
+    #
+    #     return JsonResponse({
+    #       'user': {
+    #         'username': user.username,
+    #         'email': user.email,
+    #         'name': user_info.get('name'),  # API에서 받아온 사용자 이름
+    #       }
+    #     })
+    #
+    # else:
+    #   return JsonResponse({'error': 'Failed to retrieve access token'},
+    #                       status=400)
 
 def login_2fa(user_info):
     # 여기에 2단계 인증 로직을 구현합니다.
