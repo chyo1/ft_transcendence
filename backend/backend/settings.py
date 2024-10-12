@@ -37,7 +37,25 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'social_django', #0Auth 인증
+    'backend',
+    'django_extensions',
 ]
+
+# 인증 백엔드 설정 (여기서는 Google을 예시로 사용)
+# AUTHENTICATION_BACKENDS = (
+#     'social_core.backends.google.GoogleOAuth2',  # Google OAuth2 백엔드
+#     'django.contrib.auth.backends.ModelBackend',
+# )
+
+# OAuth 관련 설정
+CLIENT_ID = 'u-s4t2ud-24c95636a0f25975e6468bfeb313c26de95a6a084519fb7f110aaf21dbe2d865'  # 42 OAuth 클라이언트 ID
+CLIENT_SECRET = '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' # 42 OAuth 클라이언트 Secret
+LOGIN_REDIRECT_URL = 'https://localhost:8000'
+OAUTH_URI = 'https://api.intra.42.fr/oauth/authorize'
+TOKEN_URI = 'https://api.intra.42.fr/oauth/token'
+USER_INFO_URL = 'https://api.intra.42.fr/v2/me'
+# SOCIAL_AUTH_REDIRECT_IS_HTTPS = True  # https 리디렉션을 사용할 경우
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -72,19 +90,17 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('POSTGRES_HOST', 'db'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        'NAME': 'mydatabase',
+        'USER': 'myuser',
+        'PASSWORD': 'mypassword',
+        'HOST': 'db',  # db 서비스 이름
+        'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -103,6 +119,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
 
 
 # Internationalization

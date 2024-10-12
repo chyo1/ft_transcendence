@@ -3,3 +3,6 @@ gunicorn
 psycopg2-binary
 social-auth-app-django
 requests==2.32.1
+django-extensions
+Werkzeug
+pyOpenSSL
