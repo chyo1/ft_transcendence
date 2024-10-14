@@ -1,0 +1,13 @@
+<form method="POST" action="{% url 'verify_2fa_code' %}">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="code">인증 코드:</label>
+        {{ form.code }}  <!-- 폼 필드 출력 -->
+        {% if form.code.errors %}
+            <div class="text-danger">
+                {{ form.code.errors }}  <!-- 오류 메시지 출력 -->
+            </div>
+        {% endif %}
+    </div>
+    <button type="submit" class="btn btn-primary">제출</button>
+</form>

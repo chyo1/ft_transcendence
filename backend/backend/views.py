@@ -1,14 +1,21 @@
 # views.py
 
 import requests
-from django.conf import settings
-from django.http import JsonResponse
 from urllib.parse import urlencode
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, get_object_or_404
 from .models import UserProfile
 from django.http import HttpResponse
 import logging
+import random
+from django.core.mail import send_mail
+from django.conf import settings
+from django import forms
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.core.mail import BadHeaderError
+from smtplib import SMTPException
+
 
 logger = logging.getLogger(__name__)
 
@@ -65,77 +72,111 @@ def login_view(request):
       user_info = user_info_response.json()
 
       # User 객체 찾기 또는 생성
-      user_email = user_info['email']
       user, created = User.objects.get_or_create(
           username=user_info['login'],  # OAuth에서 받은 username
           defaults={
-            'first_name': user_info.get('first_name'),
-            'last_name': user_info.get('last_name'),
-            'email': user_email,
+            'first_name': user_info['first_name'],
+            'last_name': user_info['last_name'],
+            'email': user_info['email'],
             'username': user_info['login'],
           }
       )
 
-      # UserProfile 객체 찾기 또는 생성
-      user_profile, profile_created = UserProfile.objects.get_or_create(
-        user=user)
-      user_profile.access_token = access_token  # access_token 저장
-      user_profile.save()  # 변경 사항 저장
+      try:
+        # UserProfile 객체 찾기
+        user_profile = UserProfile.objects.get(user=user)
 
-      # return JsonResponse({'success': 'get access token'},
-      #                     status=200)
+        # UserProfile이 존재할 경우 access_token 업데이트
+        user_profile.access_token = access_token
+        user_profile.save()  # 변경 사항 저장
 
-    #   if created:
-    #     # User가 없으면 2단계 인증을 진행
-    #     if login_2fa(user_info):
-    #       # 2단계 인증이 성공하면 UserProfile에 정보 저장
-    #       user_profile, _ = UserProfile.objects.get_or_create(user=user)
-    #       user_profile.access_token = access_token
-    #       user_profile.save()
-    #       return JsonResponse({
-    #         'user': {
-    #           'username': user.username,
-    #           'email': user.email,
-    #           'name': user_info.get('name'),  # API에서 받아온 사용자 이름
-    #         }
-    #       })
-    #     else:
-    #       return JsonResponse({'error': '2FA failed'}, status=400)
-    #
-    #   else:
-    #     # User가 이미 존재할 경우 UserProfile 업데이트
-    #     user_profile, _ = UserProfile.objects.get_or_create(user=user)
-    #     user_profile.access_token = access_token
-    #     user_profile.save()
-    #
-    #     return JsonResponse({
-    #       'user': {
-    #         'username': user.username,
-    #         'email': user.email,
-    #         'name': user_info.get('name'),  # API에서 받아온 사용자 이름
-    #       }
-    #     })
-    #
-    # else:
-    #   return JsonResponse({'error': 'Failed to retrieve access token'},
-    #                       status=400)
+        return JsonResponse({
+          'user': {
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,  # API에서 받아온 사용자 이름
+          }
+        })
 
-def login_2fa(user_info):
-    # 여기에 2단계 인증 로직을 구현합니다.
-    # 인증에 성공하면 True, 실패하면 False를 반환합니다.
+      # UserProfile이 없을 경우 2단계 인증 진행
+      except UserProfile.DoesNotExist:
+        request.session['user_id'] = user.id  # 사용자 ID를 세션에 저장
+        request.session['username'] = user.username  # 사용자 ID를 세션에 저장
+        request.session['email'] = user.email  # 이메일을 세션에 저장
+        request.session['first_name'] = user.first_name  # 이름을 세션에 저장
+        request.session['last_name'] = user.last_name  # 성을 세션에 저장
+        request.session['access_token'] = access_token  # access_token을 세션에 저장
+        return login_2fa(request, user)  # 2단계 인증 시작
 
-    # 예시: 사용자에게 2FA 코드를 보내고 입력받기
-    two_fa_code = input("Enter the 2FA code sent to your email or phone: ")
-
-    # 여기서 2FA 코드 검증 로직을 구현합니다.
-    if verify_two_fa_code(user_info['email'], two_fa_code):
-      return True
-    return False
+    else:
+      return JsonResponse({'error': 'Failed to retrieve access token'},
+                          status=400)
 
 
-def verify_two_fa_code(email, code):
-  # 여기에 실제 2FA 코드 검증 로직을 구현합니다.
-  # 예를 들어, 데이터베이스에 저장된 코드와 비교하거나 API 요청을 통해 검증할 수 있습니다.
+# 2FA 시작 함수
+def login_2fa(request, user):
+  user_email = user.email
+  code = send_2fa_code(user_email)
 
-  # 이 부분은 단순화된 예시입니다.
-  return code == "123456"  # 실제 검증 로직에 맞게 수정
+  # 세션에 코드 저장
+  request.session['2fa_code'] = code  # 예시
+
+  return redirect('verify_2fa_code')
+
+# 2FA 코드 전송 함수
+def send_2fa_code(user_email):
+  # 6자리 랜덤 숫자 생성
+  code = random.randint(100000, 999999)
+
+  try:
+    # 이메일 전송
+    send_mail(
+        'Your 2FA Code',
+        f'Your 2FA code is {code}.',
+        settings.DEFAULT_FROM_EMAIL,
+        [user_email],
+        fail_silently=False,
+    )
+    return code  # 생성된 코드를 반환
+  except BadHeaderError:
+    print("Invalid header found.")
+    return None
+  except SMTPException as e:
+    print(f"Email sending failed: {e}")
+    return None
+
+# 2FA 코드 입력 폼
+class TwoFactorAuthForm(forms.Form):
+  code = forms.CharField(max_length=6, required=True,
+                         label='Enter your 2FA code')
+
+# 2FA 코드 검증 함수
+def verify_2fa_code(request):
+  if request.method == 'POST':
+    form = TwoFactorAuthForm(request.POST)
+    if form.is_valid():
+      entered_code = form.cleaned_data['code']
+      stored_code = request.session.get('2fa_code')
+
+      # 코드가 일치하는 경우
+      if entered_code == str(stored_code):
+        del request.session['2fa_code']  # 세션에서 코드 삭제
+
+        # UserProfile 생성
+        user_id = request.session.get('user_id')  # 세션에서 사용자 ID 가져오기
+        user = User.objects.get(id=user_id)  # User 객체 가져오기
+        access_token = request.session.get('access_token')
+
+        # if user is not None:
+        user_profile = UserProfile(user=user, access_token=access_token)
+        user_profile.save()  # 객체 저장
+
+        return JsonResponse({'success': '2FA verified!'}, status=200)
+      else:
+        # 코드가 일치하지 않는 경우
+        return JsonResponse({'error': 'Invalid 2FA code'}, status=400)
+  else:
+    form = TwoFactorAuthForm()
+
+  return render(request, 'verify_2fa.html', {'form': form})

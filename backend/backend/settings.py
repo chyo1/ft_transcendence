@@ -57,6 +57,16 @@ TOKEN_URI = 'https://api.intra.42.fr/oauth/token'
 USER_INFO_URL = 'https://api.intra.42.fr/v2/me'
 # SOCIAL_AUTH_REDIRECT_IS_HTTPS = True  # https 리디렉션을 사용할 경우
 
+# 2fa 이메일 설정
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # SMTP 서버 호스트
+EMAIL_PORT = 587  # 일반적으로 사용하는 포트 (587, 465 등)
+EMAIL_USE_TLS = True  # TLS 사용 여부
+EMAIL_HOST_USER = 'hyowon3856@gmail.com'  # SMTP 사용자 이메일
+EMAIL_HOST_PASSWORD = 'mphb fplc zcuo gfsi'  # SMTP 비밀번호
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # 기본 발신자 이메일
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
