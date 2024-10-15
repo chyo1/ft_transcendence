@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -49,8 +50,8 @@ INSTALLED_APPS = [
 # )
 
 # OAuth 관련 설정
-CLIENT_ID = 'u-s4t2ud-962c1357c0982f1b74d2c3c06249f541d8117b56054ee4c2c2069b33100aa5e7'  # 42 OAuth 클라이언트 ID
-CLIENT_SECRET = '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' # 42 OAuth 클라이언트 Secret
+CLIENT_ID = config('CLIENT_ID') # 42 OAuth 클라이언트 ID
+CLIENT_SECRET = config('CLIENT_SECRET') # 42 OAuth 클라이언트 Secret
 LOGIN_REDIRECT_URL = 'https://localhost:8000/oauth'
 OAUTH_URI = 'https://api.intra.42.fr/oauth/authorize'
 TOKEN_URI = 'https://api.intra.42.fr/oauth/token'
@@ -62,8 +63,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # SMTP 서버 호스트
 EMAIL_PORT = 587  # 일반적으로 사용하는 포트 (587, 465 등)
 EMAIL_USE_TLS = True  # TLS 사용 여부
-EMAIL_HOST_USER = 'hyowon3856@gmail.com'  # SMTP 사용자 이메일
-EMAIL_HOST_PASSWORD = 'mphb fplc zcuo gfsi'  # SMTP 비밀번호
+EMAIL_HOST_USER = config('EMAIL_HOST_USER') # SMTP 사용자 이메일
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')  # SMTP 비밀번호
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # 기본 발신자 이메일
 
 
@@ -106,7 +107,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'mydatabase',
         'USER': 'myuser',
-        'PASSWORD': 'mypassword',
+        'PASSWORD': config('DATABASE_PASSWORD'),
         'HOST': 'database',  # db 서비스 이름
         'PORT': '5432',
     }
