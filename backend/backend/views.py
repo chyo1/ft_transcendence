@@ -171,40 +171,50 @@ class TwoFactorAuthForm(forms.Form):
 # 2FA 코드 검증 함수
 def verify_2fa_code(request):
   if request.method == 'POST':
-    form = TwoFactorAuthForm(request.POST)
-    if form.is_valid():
-      entered_code = form.cleaned_data['code']
-      stored_code = request.session.get('2fa_code')
-
-      # 코드가 일치하는 경우
-      if entered_code == str(stored_code):
-        del request.session['2fa_code']  # 세션에서 코드 삭제
-
-        # UserProfile 생성
-        user_id = request.session.get('user_id')  # 세션에서 사용자 ID 가져오기
-        user = User.objects.get(id=user_id)  # User 객체 가져오기
-        access_token = request.session.get('access_token')
-
-        user_profile = UserProfile(user=user, access_token=access_token)
-        user_profile.save()  # 객체 저장
-        # JWT 토큰 발급
-        refresh = RefreshToken.for_user(user)
-
-        return JsonResponse({
-          'message': 'Authentication successful',
-          'jwt': str(refresh.access_token),
-          'refresh': str(refresh),
-          'user': {
-            'username': user.username,
-            'email': user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name,  # API에서 받아온 사용자 이름
-          }
-        })
-      else:
-        # 코드가 일치하지 않는 경우
-        return JsonResponse({'error': 'Invalid 2FA code'}, status=400)
+    return process_2fa_code(request)
   else:
-    form = TwoFactorAuthForm()
+   return render_2fa_form(request)
 
+def process_2fa_code(request):
+  form = TwoFactorAuthForm(request.POST)
+  if form.is_valid():
+    entered_code = form.cleaned_data['code']
+    stored_code = request.session.get('2fa_code')
+
+    # 코드가 일치하는 경우
+    if entered_code == str(stored_code):
+      return complete_auth_login(request)
+
+    # 코드가 일치하지 않는 경우
+    else:
+      return JsonResponse({'error': 'Invalid 2FA code'}, status=400)
+
+def complete_auth_login(request):
+  del request.session['2fa_code']  # 세션에서 코드 삭제
+
+  # UserProfile 생성
+  user_id = request.session.get('user_id')  # 세션에서 사용자 ID 가져오기
+  user = User.objects.get(id=user_id)  # User 객체 가져오기
+  access_token = request.session.get('access_token')
+
+  user_profile = UserProfile(user=user, access_token=access_token)
+  user_profile.save()  # 객체 저장
+
+  # JWT 토큰 발급
+  refresh = RefreshToken.for_user(user)
+
+  return JsonResponse({
+    'message': 'Authentication successful',
+    'jwt': str(refresh.access_token),
+    'refresh': str(refresh),
+    'user': {
+      'username': user.username,
+      'email': user.email,
+      'first_name': user.first_name,
+      'last_name': user.last_name,  # API에서 받아온 사용자 이름
+    }
+  })
+
+def render_2fa_form(request):
+  form = TwoFactorAuthForm()
   return render(request, 'verify_2fa.html', {'form': form})
