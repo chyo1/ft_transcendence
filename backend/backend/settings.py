@@ -43,12 +43,6 @@ INSTALLED_APPS = [
     'backend',
 ]
 
-# 인증 백엔드 설정 (여기서는 Google을 예시로 사용)
-# AUTHENTICATION_BACKENDS = (
-#     'social_core.backends.google.GoogleOAuth2',  # Google OAuth2 백엔드
-#     'django.contrib.auth.backends.ModelBackend',
-# )
-
 # OAuth 관련 설정
 CLIENT_ID = config('CLIENT_ID') # 42 OAuth 클라이언트 ID
 CLIENT_SECRET = config('CLIENT_SECRET') # 42 OAuth 클라이언트 Secret
