@@ -15,6 +15,8 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.core.mail import BadHeaderError
 from smtplib import SMTPException
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 logger = logging.getLogger(__name__)
@@ -168,11 +170,23 @@ def verify_2fa_code(request):
         user = User.objects.get(id=user_id)  # User 객체 가져오기
         access_token = request.session.get('access_token')
 
-        # if user is not None:
         user_profile = UserProfile(user=user, access_token=access_token)
         user_profile.save()  # 객체 저장
+        # JWT 토큰 발급
+        refresh = RefreshToken.for_user(user)
 
-        return JsonResponse({'success': '2FA verified!'}, status=200)
+        return JsonResponse({
+          'message': 'Authentication successful',
+          'jwt': str(refresh.access_token),
+          'refresh': str(refresh),
+          'user': {
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,  # API에서 받아온 사용자 이름
+          }
+        })
+        # return JsonResponse({'success': '2FA verified!'}, status=200)
       else:
         # 코드가 일치하지 않는 경우
         return JsonResponse({'error': 'Invalid 2FA code'}, status=400)

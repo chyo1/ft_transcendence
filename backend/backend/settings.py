@@ -28,9 +28,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
-# Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,6 +40,13 @@ INSTALLED_APPS = [
     'backend',
 ]
 
+# JWT 토큰 발급
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
 # OAuth 관련 설정
 CLIENT_ID = config('CLIENT_ID') # 42 OAuth 클라이언트 ID
 CLIENT_SECRET = config('CLIENT_SECRET') # 42 OAuth 클라이언트 Secret
@@ -50,7 +54,6 @@ LOGIN_REDIRECT_URL = 'https://localhost:8000/oauth'
 OAUTH_URI = 'https://api.intra.42.fr/oauth/authorize'
 TOKEN_URI = 'https://api.intra.42.fr/oauth/token'
 USER_INFO_URL = 'https://api.intra.42.fr/v2/me'
-# SOCIAL_AUTH_REDIRECT_IS_HTTPS = True  # https 리디렉션을 사용할 경우
 
 # 2fa 이메일 설정
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -95,7 +98,6 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 # Database
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',

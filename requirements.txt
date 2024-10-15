@@ -7,3 +7,4 @@ django-extensions
 Werkzeug
 pyOpenSSL
 python-decouple
+djangorestframework-simplejwt
