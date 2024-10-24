@@ -35,18 +35,19 @@ services:
       dockerfile: ./frontend/Dockerfile
     container_name: trans_frontend
     volumes:
-      - ./frontend:/usr/share/nginx/html
+      - frontend-build:/usr/share/build
     networks:
       - app-network
-    ports:
-      - "3000:80"
+    #ports:
+    #  - "3000:80"
   nginx:
     build:
       context: ./nginx
       dockerfile: Dockerfile
     container_name: trans_nginx
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+  #    - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - frontend-build:/usr/share/nginx/html
     depends_on:
       - backend
       - frontend
@@ -57,6 +58,7 @@ services:
 
 volumes:
   postgres_data:
+  frontend-build:
 
 networks:
   app-network:
