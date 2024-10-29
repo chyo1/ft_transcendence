@@ -202,18 +202,46 @@ def complete_auth_login(request):
 
   # JWT 토큰 발급
   refresh = RefreshToken.for_user(user)
+  access_token = refresh.access_token
 
-  return JsonResponse({
+  response = JsonResponse({
     'message': 'Authentication successful',
-    'jwt': str(refresh.access_token),
-    'refresh': str(refresh),
     'user': {
       'username': user.username,
       'email': user.email,
       'first_name': user.first_name,
-      'last_name': user.last_name,  # API에서 받아온 사용자 이름
+      'last_name': user.last_name,
     }
   })
+
+  # 쿠키에 jwt와 refresh 토큰 설정
+  response.set_cookie(
+      'jwt', str(access_token),
+      httponly=True,
+      secure=False,  # 로컬 개발에서는 False로 설정
+      samesite='Lax',
+      path='/',  # 필요 시 모든 경로에 쿠키 적용
+  )
+  response.set_cookie(
+      'refresh', str(refresh),
+      httponly=True,
+      secure=False,
+      samesite='Lax',
+      path='/'
+  )
+
+  return response
+  # return JsonResponse({
+  #   'message': 'Authentication successful',
+  #   'jwt': str(refresh.access_token),
+  #   'refresh': str(refresh),
+  #   'user': {
+  #     'username': user.username,
+  #     'email': user.email,
+  #     'first_name': user.first_name,
+  #     'last_name': user.last_name,  # API에서 받아온 사용자 이름
+  #   }
+  # })
 
 def render_2fa_form(request):
   form = TwoFactorAuthForm()
