@@ -24,6 +24,7 @@ urlpatterns = [
     path('', views.home_view, name='home'),  # 기본 URL에 대한 뷰
 
     path('oauth', views.login_view, name='login'),
+    path('api/oauth', views.complete_oauth, name='complete_oauth'),
 
     path('2fa/verify', views.verify_2fa_code, name='verify_2fa_code'),
 ]

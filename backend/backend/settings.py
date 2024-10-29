@@ -52,7 +52,7 @@ REST_FRAMEWORK = {
 # OAuth 관련 설정
 CLIENT_ID = config('CLIENT_ID') # 42 OAuth 클라이언트 ID
 CLIENT_SECRET = config('CLIENT_SECRET') # 42 OAuth 클라이언트 Secret
-LOGIN_REDIRECT_URL = 'https://localhost/'
+LOGIN_REDIRECT_URL = 'https://localhost/api/oauth'
 OAUTH_URI = 'https://api.intra.42.fr/oauth/authorize'
 TOKEN_URI = 'https://api.intra.42.fr/oauth/token'
 USER_INFO_URL = 'https://api.intra.42.fr/v2/me'
