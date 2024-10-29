@@ -27,4 +27,5 @@ urlpatterns = [
     path('api/oauth', views.complete_oauth, name='complete_oauth'),
 
     path('2fa/verify', views.verify_2fa_code, name='verify_2fa_code'),
+    path('api/2fa/verify', views.verify_2fa_code, name='verify_2fa_code'),
 ]

@@ -66,6 +66,10 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER') # SMTP 사용자 이메일
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')  # SMTP 비밀번호
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # 기본 발신자 이메일
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://localhost',
+]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
