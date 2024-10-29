@@ -26,7 +26,9 @@ SECRET_KEY = 'django-insecure-tg2*@rmjrm@a+d!9d*nco5m=dxfbtwyuh@@vozj&1xl23!1388
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost', 'backend', '127.0.0.1', '0.0.0.0', 'nginx'
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -50,7 +52,7 @@ REST_FRAMEWORK = {
 # OAuth 관련 설정
 CLIENT_ID = config('CLIENT_ID') # 42 OAuth 클라이언트 ID
 CLIENT_SECRET = config('CLIENT_SECRET') # 42 OAuth 클라이언트 Secret
-LOGIN_REDIRECT_URL = 'https://localhost:8000/oauth'
+LOGIN_REDIRECT_URL = 'https://localhost/'
 OAUTH_URI = 'https://api.intra.42.fr/oauth/authorize'
 TOKEN_URI = 'https://api.intra.42.fr/oauth/token'
 USER_INFO_URL = 'https://api.intra.42.fr/v2/me'
