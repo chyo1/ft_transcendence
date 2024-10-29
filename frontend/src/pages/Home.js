@@ -34,6 +34,9 @@ export default class Home extends Component {
 			window.dispatchEvent(routeChangeEvent);
 		}
 
+		this.addEvent('click', '#redirect-login', () => {
+			window.location.href = '/api/oauth?' + this.$url.urlParams.toString();
+		})
 		this.addEvent('click', '#open-modal-duo', () => {
 			openModal(modalDuo(this.$url.getParam('language')));
 			this.$url.setPathname('/games');
