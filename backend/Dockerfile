@@ -27,4 +27,4 @@ COPY ./backend /app/
 # Django 애플리케이션의 시작 명령어
 #CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
-CMD ["python", "manage.py", "runserver_plus", "--cert-file", "/etc/ssl/certs/your_certificate.crt", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver_plus", "0.0.0.0:8000"]

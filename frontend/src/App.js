@@ -1,8 +1,8 @@
 import Component from "./core/Component.js";
-import Modal from "./components/Modal.js";
+import UrlQueryHandler from "./core/UrlQueryHandler.js";
 
+import Modal from "./components/Modal.js";
 import preloading from "./pages/index.js";
-import UrlQueryHandler from "./components/UrlQueryHandler.js";
 
 
 export default class App extends Component {
