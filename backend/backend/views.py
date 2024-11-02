@@ -8,6 +8,7 @@ from .models import UserProfile
 from django.http import HttpResponse, HttpResponseRedirect
 import logging
 import random
+import json
 from django.core.mail import send_mail
 from django.conf import settings
 from django import forms
@@ -59,7 +60,14 @@ def complete_oauth(request):
     try:
       # UserProfile 객체 찾기
       user_profile = UserProfile.objects.get(user=user)
-      return update_user_info(user_profile, access_token)
+      response = HttpResponseRedirect('https://localhost')
+      response.set_cookie('user_data', json.dumps(update_user_info(user_profile, access_token)),
+      httponly=True,
+      secure=True,  # 로컬 개발에서는 False로 설정
+      samesite='None',
+      path='/',  # 필요 시 모든 경로에 쿠키 적용
+      )
+      return response
 
     # UserProfile이 없을 경우 2단계 인증 진행
     except UserProfile.DoesNotExist:
@@ -114,14 +122,14 @@ def update_user_info(user_profile, access_token):
   user_profile.access_token = access_token
   user_profile.save()  # 변경 사항 저장
 
-  return JsonResponse({
+  return {
     'user': {
       'username': user_profile.user.username,
       'email': user_profile.user.email,
       'first_name': user_profile.user.first_name,
       'last_name': user_profile.user.last_name,  # API에서 받아온 사용자 이름
     }
-  })
+  }
 
 def save_user_info_to_sessioin(request, user, access_token):
   request.session['user_id'] = user.id  # 사용자 ID를 세션에 저장
@@ -190,7 +198,8 @@ def process_2fa_code(request):
       return JsonResponse({'error': 'Invalid 2FA code'}, status=400)
 
 def complete_auth_login(request):
-  del request.session['2fa_code']  # 세션에서 코드 삭제
+  if '2fa_code' in request.session:
+    del request.session['2fa_code']  # 세션에서 코드 삭제
 
   # UserProfile 생성
   user_id = request.session.get('user_id')  # 세션에서 사용자 ID 가져오기
@@ -215,20 +224,36 @@ def complete_auth_login(request):
   #     'last_name': user.last_name,
   #   }
   # })
+  user_data = {
+    'user': {
+      'username': user_profile.user.username,
+      'email': user_profile.user.email,
+      'first_name': user_profile.user.first_name,
+      'last_name': user_profile.user.last_name,  # API에서 받아온 사용자 이름
+    } 
+  }
+
+  response.set_cookie(
+      'user_data', json.dumps(user_data),
+      httponly=True,
+      secure=True,  # 로컬 개발에서는 False로 설정
+      samesite='None',
+      path='/',  # 필요 시 모든 경로에 쿠키 적용
+  )
 
   # 쿠키에 jwt와 refresh 토큰 설정
   response.set_cookie(
       'jwt', str(access_token),
       httponly=True,
-      secure=False,  # 로컬 개발에서는 False로 설정
-      samesite='Lax',
+      secure=True,  # 로컬 개발에서는 False로 설정
+      samesite='None',
       path='/',  # 필요 시 모든 경로에 쿠키 적용
   )
   response.set_cookie(
       'refresh', str(refresh),
       httponly=True,
-      secure=False,
-      samesite='Lax',
+      secure=True,
+      samesite='None',
       path='/'
   )
   return response
