@@ -12,16 +12,20 @@ services:
       POSTGRES_PASSWORD: mypassword
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "myuser", "-d", "mydatabase"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
       context: .
       dockerfile: ./backend/Dockerfile
     container_name: trans_backend
-    volumes:
-      - ./backend:/app
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     networks:
       - app-network
     ports:
@@ -46,7 +50,6 @@ services:
       dockerfile: Dockerfile
     container_name: trans_nginx
     volumes:
-  #    - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - frontend-build:/usr/share/nginx/html
     depends_on:
       - backend
