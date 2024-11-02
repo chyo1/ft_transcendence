@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, get_object_or_404
 from .models import UserProfile
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 import logging
 import random
 from django.core.mail import send_mail
@@ -204,15 +204,17 @@ def complete_auth_login(request):
   refresh = RefreshToken.for_user(user)
   access_token = refresh.access_token
 
-  response = JsonResponse({
-    'message': 'Authentication successful',
-    'user': {
-      'username': user.username,
-      'email': user.email,
-      'first_name': user.first_name,
-      'last_name': user.last_name,
-    }
-  })
+  # 사용자를 다른 URL로 리디렉션
+  response = HttpResponseRedirect('https://localhost')
+  # response = JsonResponse({
+  #   'message': 'Authentication successful',
+  #   'user': {
+  #     'username': user.username,
+  #     'email': user.email,
+  #     'first_name': user.first_name,
+  #     'last_name': user.last_name,
+  #   }
+  # })
 
   # 쿠키에 jwt와 refresh 토큰 설정
   response.set_cookie(
@@ -229,19 +231,7 @@ def complete_auth_login(request):
       samesite='Lax',
       path='/'
   )
-
   return response
-  # return JsonResponse({
-  #   'message': 'Authentication successful',
-  #   'jwt': str(refresh.access_token),
-  #   'refresh': str(refresh),
-  #   'user': {
-  #     'username': user.username,
-  #     'email': user.email,
-  #     'first_name': user.first_name,
-  #     'last_name': user.last_name,  # API에서 받아온 사용자 이름
-  #   }
-  # })
 
 def render_2fa_form(request):
   form = TwoFactorAuthForm()
